@@ -40,7 +40,7 @@ MD5=0
 INITIAL=0
 NEW=0
 COMP="none"
-WD="/tmp" # Working Directory (Use the -w/--wd argument to change)
+WD="/mnt/user/movies-processing" # Working Directory (Use the -w/--wd argument to change)
 
 # These are so you can make quick changes to the cmdline args without having to search and replace the entire script
 DUCMD="$(which \du) -k"
@@ -192,6 +192,21 @@ doprint() {
 		echo -e "$1"
 	fi
 }
+
+MAPPINGS="-v /mnt/user/movies-processing:/mnt/user/movies-processing:rw -v /mnt/user/media-movies:/mnt/user/media-movies:rw -v /mnt/user/movies-incoming:/mnt/user/movies-incoming:rw"
+
+mkvmerge() {
+    docker run --rm $MAPPINGS jlesage/mkvtoolnix /usr/bin/mkvmerge "$@"
+}
+
+mkvextract() {
+    docker run --rm $MAPPINGS jlesage/mkvtoolnix /usr/bin/mkvextract "$@"
+}
+
+mkvinfo() {
+    docker run --rm $MAPPINGS jlesage/mkvtoolnix /usr/bin/mkvinfo "$@"
+}
+
 
 #---------- START OF PROGRAM ----------
 # Start the timer and make a working copy for future timings
@@ -348,9 +363,10 @@ if [ $EXECUTE = 1 ]; then
 	fi
 
 	# Check dependencies
-	checkdep mkvmerge
-	checkdep mkvextract
-	checkdep mkvinfo
+	# TREVIN: Replace these 3 checks with making sure MKVToolNix docker is running
+	#checkdep mkvmerge
+	#checkdep mkvextract
+	#checkdep mkvinfo
 	checkdep ffmpeg
 	checkdep rsync
 	checkdep perl
@@ -496,7 +512,8 @@ DELAY=$"DELAY" #Value for debugging
 dopause
 if [ $EXECUTE = 1 ]; then
 	color YELLOW; echo $"Extracting Timecodes:"; color OFF
-	nice -n $PRIORITY mkvextract timecodes_v2 "$MKVFILE" $DTSTRACK:"$TCFILE"
+	#nice -n $PRIORITY mkvextract timecodes_v2 "$MKVFILE" $DTSTRACK:"$TCFILE"
+	mkvextract timecodes_v2 "$MKVFILE" $DTSTRACK:"$TCFILE"
 	DELAY=$(sed -n "2p" "$TCFILE")
 	cleanup "$TCFILE"
 	timestamp $"Timecode extraction took:	"
@@ -511,7 +528,8 @@ doprint "> mkvextract tracks \"$MKVFILE\" $DTSTRACK:\"$DTSFILE\""
 dopause
 if [ $EXECUTE = 1 ]; then
 	color YELLOW; echo $"Extracting DTS Track: "; color OFF
-	nice -n $PRIORITY mkvextract tracks "$MKVFILE" $DTSTRACK:"$DTSFILE" 2>&1|perl -ne '$/="\015";next unless /Progress/;$|=1;print "%s\r",$_' #Use Perl to change EOL from \n to \r show Progress %
+	#nice -n $PRIORITY mkvextract tracks "$MKVFILE" $DTSTRACK:"$DTSFILE" 2>&1|perl -ne '$/="\015";next unless /Progress/;$|=1;print "%s\r",$_' #Use Perl to change EOL from \n to \r show Progress %
+	mkvextract tracks "$MKVFILE" $DTSTRACK:"$DTSFILE" 2>&1|perl -ne '$/="\015";next unless /Progress/;$|=1;print "%s\r",$_' #Use Perl to change EOL from \n to \r show Progress %
 	checkerror $? $"Extracting DTS track failed." 1
 	timestamp $"DTS track extracting took:	"
 fi
@@ -559,7 +577,8 @@ if [ $EXTERNAL ]; then
 	MKVFILE="$DEST/$NAME.ac3"
 else
 	# Start to "build" command
-	CMD="nice -n $PRIORITY mkvmerge"
+	#CMD="nice -n $PRIORITY mkvmerge"
+	CMD="mkvmerge"
 
 	# Puts the AC3 track as the second in the file if indicated as initial
 	if [ $INITIAL = 1 ]; then
