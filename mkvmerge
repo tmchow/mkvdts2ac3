@@ -1,7 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
-my_dir="$(dirname "$0")"
+SHARES_LIST=("/mnt/user/media-movies" "/mnt/user/movies-processing" "/mnt/user/movies-incoming")
 
-"$my_dir/shares_list.sh"
+for i in "${SHARES_LIST[@]}"
+do
+	SHARES="$SHARES-v $i:$i:rw "
+done
 
 docker run --rm $SHARES jlesage/mkvtoolnix /usr/bin/mkvmerge "$@"
