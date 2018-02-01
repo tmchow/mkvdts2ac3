@@ -302,6 +302,14 @@ while [ -z "$MKVFILE" ]; do
 			MKVFILE=$1
 			shift
 
+                        # Ensure file is passed in with absolute path, otherwise won't work with docker container approach
+                       	MKVFILE_FULLPATH=`readlink -f $MKVFILE`
+                       	if [ $MKVFILE != $MKVFILE_FULLPATH ]; then
+                               	error $"You must pass in full absolute path to file."
+                               	exit 1
+                       	fi
+
+
 			# Ensure there are no arguments after the filename
 			if [ $# -ne 0 ]; then
 				error $"You cannot supply any arguments after the filename. Please check the command syntax below against what has been parsed."
