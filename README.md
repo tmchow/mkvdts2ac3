@@ -28,6 +28,12 @@ You can download the script directly with wget or curl:
 Otherwise you can click the "Download" link on the GitHub project page and
 download an archive and extract its contents.
 
+Edit each of the shell scripts `mkvextract`, `mkvinfo` and `mkvmerge` so the
+right path mappings are included. The key to getting this to work on Unraid
+using the docker container for MKVtoolnix is that we map paths exactly the 
+same as main unraid system (outside the docker) so the apps running within
+the docker reference the files the same as you do outside the container.
+
 Copy shell scripts `mkvextract`, `mkvinfo` and `mkvmerge` into `/usr/bin`.
 These are scripts that wrap calls into the MKVToolNix container to avoid 
 needing to change the original `mkvdts2ac3.sh` script.
