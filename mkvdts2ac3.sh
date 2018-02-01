@@ -2,11 +2,12 @@
 # mkvdts2ac3.sh - add an AC3 track to an MKV from its DTS track
 # Author: Jake Wharton <jakewharton@gmail.com>
 #         Chris Hoekstra <chris.hoekstra@gmail.com>
-# Website: http://jakewharton.com
-#          http://github.com/JakeWharton/mkvdts2ac3/
-# Version: 1.6.0
+# Website: http://github.com/tmchow/mkvdts2ac3/
+# Original project: http://github.com/JakeWharton/mkdvdts2ac3/
+# Version: 1.0
 # License:
-#   Copyright 2011 Jake Wharton
+#   Copyright 2018 Trevin Chow
+#   Baseed on code originally by Jake Wharton and Chris Hoekstra
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -22,9 +23,7 @@
 
 
 # Display version header
-echo "mkvdts2ac3-1.6.0 - by Jake Wharton <jakewharton@gmail.com> and"
-echo "                      Chris Hoekstra <chris.hoekstra@gmail.com>"
-echo
+echo "mkvdts2ac3-1.0 - by Trevin Chow"
 
 # Debugging flags
 # DO NOT EDIT THESE! USE --debug OR --test ARGUMENT INSTEAD.
@@ -303,6 +302,14 @@ while [ -z "$MKVFILE" ]; do
 			MKVFILE=$1
 			shift
 
+			# Ensure file is passed in with absolute path, otherwise won't work with docker container approach
+			MKVFILE_FULLPATH=`readlink -f $MKVFILE`
+                        if [ $MKVFILE != $MKVFILE_FULLPATH ]; then
+                                error $"You must pass in full absolute path to file."
+                                exit 1
+                        fi
+
+
 			# Ensure there are no arguments after the filename
 			if [ $# -ne 0 ]; then
 				error $"You cannot supply any arguments after the filename. Please check the command syntax below against what has been parsed."
@@ -402,11 +409,11 @@ doprint $"WORKING DIRECTORY: $WD"
 if [ -z $DTSTRACK ]; then
 	doprint ""
 	doprint $"Find first DTS track in MKV file."
-	doprint "> mkvmerge -i \"$MKVFILE\" | grep -m 1 \"${AUDIOTRACKPREFIX}DTS)\" | cut -d ":" -f 1 | cut -d \" \" -f 3"
+	doprint "> mkvmerge -i \"$MKVFILE\" | grep -m 1 \"${AUDIOTRACKPREFIX}DTS*)\" | cut -d ":" -f 1 | cut -d \" \" -f 3"
 	DTSTRACK="DTSTRACK" #Value for debugging
 	dopause
 	if [ $EXECUTE = 1 ]; then
-		DTSTRACK=$(mkvmerge -i "$MKVFILE" | grep -m 1 "${AUDIOTRACKPREFIX}DTS)" | cut -d ":" -f 1 | cut -d " " -f 3)
+		DTSTRACK=$(mkvmerge -i "$MKVFILE" | grep -m 1 "${AUDIOTRACKPREFIX}DTS*)" | cut -d ":" -f 1 | cut -d " " -f 3)
 
 		# Check to make sure there is a DTS track in the MVK
 		if [ -z $DTSTRACK ]; then
