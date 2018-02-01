@@ -2,6 +2,8 @@
 Matroska (MKV) files to AC3. It provides you with a healthy set of options
 for controlling the resulting file.
 
+Original is is by [Jake Wharton](https://github.com/JakeWharton/mkvdts2ac3) but is modified here to work for my own use case specifically on Unraid.
+
 Installation
 ============
 
@@ -9,28 +11,31 @@ Prerequisites
 -------------
 Make sure the executables for the following libraries are accessible.
 
-1. [mkvtoolnix](http://www.bunkus.org/videotools/mkvtoolnix/) - Matroska tools
+1. [mkvtoolnix docker](https://lime-technology.com/forums/topic/58039-support-djoss-mkvtoolnix/) - Matroska tools docker container (lesage/mkvtoolnix)
 2. [ffmpeg](http://ffmpeg.org/) - Audio conversion tool
 3. [rsync](http://rsync.samba.org/) - File transfer and synchronization
-
-*Note: If you are a Mac OS X user you may need to compile these libraries.*
 
 Installation
 ------------
 If you have `git` installed, you can just run
-`git clone git://github.com/JakeWharton/mkvdts2ac3.git`.
+`git clone git://github.com/tmchow/mkvdts2ac3.git`.
 
 You can download the script directly with wget or curl:
-  wget https://raw.github.com/JakeWharton/mkvdts2ac3/master/mkvdts2ac3.sh
+  wget https://raw.github.com/tmchow/mkvdts2ac3/master/mkvdts2ac3.sh
   -or-
-  curl -O https://raw.github.com/JakeWharton/mkvdts2ac3/master/mkvdts2ac3.sh
+  curl -O https://raw.github.com/tmchow/mkvdts2ac3/master/mkvdts2ac3.sh
 
 Otherwise you can click the "Download" link on the GitHub project page and
 download an archive and extract its contents.
 
+Copy shell scripts `mkvextract`, `mkvinfo` and `mkvmerge` into `/usr/bin`.
+These are scripts that wrap calls into the MKVToolNix container to avoid 
+needing to change the original `mkvdts2ac3.sh` script.
+
 Optional: If you want easy access to the script from any directory you can copy
 or symlink the `mkvdts2ac3.sh` file to a directory in your PATH variable or else
 append the script's directory to the PATH variable.
+
 
 Usage
 =====
