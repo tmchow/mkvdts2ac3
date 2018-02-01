@@ -49,7 +49,10 @@ This script was designed to be very simple and will automatically convert the
 first DTS track it finds in a Matroska file to AC3 and append it when run
 without any arguments. Since this was the most common scenario for the
 developer it is the default action.
-    mkvdts2ac3.sh Some.Random.Movie.mkv
+    mkvdts2ac3.sh /path/to/file/Some.Random.Movie.mkv
+
+**IMPORTANT: This script only works with docker on unraid (my specific use case)
+if you pass in full paths**
 
 For users who wish to change the behavior there are a variety of options which
 control various aspects of the script. Here is the output of the `--help`
@@ -118,42 +121,42 @@ Examples
 --------
 Keep only the new AC3 track, discarding the original DTS
 
-    mkvdts2ac3.sh -n Some.Random.Movie.mkv
+    mkvdts2ac3.sh -n /dir/Some.Random.Movie.mkv
 
 Specify an alternate directory to use for the temporary files. This can be
 useful when the partition your `/tmp` directory on is tiny.
 
-    mkvdts2ac3.sh -w /mnt/bigHDD Some.Random.Movie.mkv
+    mkvdts2ac3.sh -w /mnt/bigHDD /dir/Some.Random.Movie.mkv
 
 Convert a different DTS track rather than the first one sequentially in the
 file. This will require you to check the output of a command like
 `mkvmerge -i Some.Random.Movie.mkv` which will give you the track ids of each
 file.
 
-    mkvdts2ac3.sh -t 4 Some.Random.Movie.mkv
+    mkvdts2ac3.sh -t 4 /dir/Some.Random.Movie.mkv
 
 If you want to retain the DTS track in an alternate location you can instruct
 the script not to delete it after the conversion.
 
-    mkvdts2ac3.sh -k Some.Random.Movie.mkv
+    mkvdts2ac3.sh -k /dir/Some.Random.Movie.mkv
 
 If you want to keep the original file untouched (such as if you are still
 seeding it in a torrent) and your player supports external audio tracks you
 can choose to leave the converted AC3 track out of the file.
 
-    mkvdts2ac3.sh -e Some.Random.Movie.mkv
+    mkvdts2ac3.sh -e /dir/Some.Random.Movie.mkv
 
 All of these examples only showcase the use of a single argument but they can
 be combined to achieve the desired result.
 
-    mkvdts2ac3.sh -d -t 3 -w /mnt/media/tmp/ Some.Random.Movie.mkv
+    mkvdts2ac3.sh -d -t 3 -w /mnt/media/tmp/ /dir/Some.Random.Movie.mkv
 
 If you're unsure of what any command will do run it with the `--test` argument
 to display a list of command execute. You can also use the `--debug` argument
 which will print out the commands and wait for the user to press the return key
 before running each.
 
-    $ ./mkvdts2ac3.sh --test -d -t 3 -w /mnt/media/tmp Some.Random.Movie.mkv
+    $ ./mkvdts2ac3.sh --test -d -t 3 -w /mnt/media/tmp /dir/Some.Random.Movie.mkv
     
     mkvdts2ac3-1.5.3 - by Jake Wharton <jakewharton@gmail.com> and
                           Chris Hoekstra <chris.hoekstra@gmail.com>
@@ -165,10 +168,10 @@ before running each.
     NEW FILE: /mnt/media/tmp/Some.Random.Movie.new.mkv
     WORKING DIRECTORY: /mnt/media/tmp
     Checking to see if DTS track specified via arguments is valid.
-    > mkvmerge -i "Some.Random.Movie.mkv" | grep "Track ID 3: audio (A_DTS)"
+    > mkvmerge -i "/dir/Some.Random.Movie.mkv" | grep "Track ID 3: audio (A_DTS)"
     
     Extract track information for selected DTS track.
-    > mkvinfo "Some.Random.Movie.mkv" | grep -A 25 "Track number: 3"
+    > mkvinfo "/dir/Some.Random.Movie.mkv" | grep -A 25 "Track number: 3"
     
     Extract language from track info.
     > echo "INFO" | grep -m 1 "Language" | cut -d " " -f 5
@@ -177,7 +180,7 @@ before running each.
     > echo "INFO" | grep -m 1 "Name" | cut -d " " -f 5- | sed "s/DTS/AC3/" | awk '{gsub(/[0-9]+(\.[0-9]+)?(M|K)bps/,"448Kbps")}1'
     
     Extract timecode information for the audio track.
-    > mkvextract timecodes_v2 "Some.Random.Movie.mkv" 3:"/mnt/media/tmp/Some.Random.Movie.tc"
+    > mkvextract timecodes_v2 "/dir/Some.Random.Movie.mkv" 3:"/mnt/media/tmp/Some.Random.Movie.tc"
     > sed -n "2p" "/mnt/media/tmp/Some.Random.Movie.tc"
     > rm -f "/mnt/media/tmp/Some.Random.Movie.tc"
     
@@ -187,19 +190,19 @@ before running each.
     > ffmpeg -i "/mnt/media/tmp/Some.Random.Movie.dts" -acodec ac3 -ac 6 -ab 448k "/mnt/media/tmp/Some.Random.Movie.ac3"
     
     Running main remux.
-    > nice -n 0 mkvmerge -q -o "/mnt/media/tmp/Some.Random.Movie.new.mkv" --compression 1:none "Some.Random.Movie.mkv" --default-track 0 --language     0:DTSLANG --track-name 0:"DTSNAME" --sync 0:DELAY --compression 0:none "/mnt/media/tmp/Some.Random.Movie.ac3"
+    > nice -n 0 mkvmerge -q -o "/mnt/media/tmp/Some.Random.Movie.new.mkv" --compression 1:none "/dir/Some.Random.Movie.mkv" --default-track 0 --language     0:DTSLANG --track-name 0:"DTSNAME" --sync 0:DELAY --compression 0:none "/mnt/media/tmp/Some.Random.Movie.ac3"
     Removing temporary AC3 file.
     > rm -f "/mnt/media/tmp/Some.Random.Movie.ac3"
     
     Copying new file over the old one.
-    > cp "/mnt/media/tmp/Some.Random.Movie.new.mkv" "Some.Random.Movie.mkv"
+    > cp "/mnt/media/tmp/Some.Random.Movie.new.mkv" "/dir/Some.Random.Movie.mkv"
     
     Remove working file.
     > rm -f "/mnt/media/tmp/Some.Random.Movie.new.mkv"
 
 
-Developed By
-============
+Based on code originally Developed By
+=====================================
 * Jake Wharton - <jakewharton@gmail.com>
 * Chris Hoekstra - <chris.hoekstra@gmail.com>
 
@@ -207,38 +210,10 @@ Git repository located at
 [github.com/JakeWharton/mkvdts2ac3](http://github.com/JakeWharton/mkvdts2ac3)
 
 
-Very Special Thanks
--------------------
-* Philipp Winkler - Munich, Germany
-* Paul Tilley
-* Paulo Ferreira
-* Douglas Carter
-
-Thanks
-------
-The following people contributed useful thoughts or code to `mkvdts2ac3`:
-
-* John Nilsson - Dependency, file, and space checking as well as general bash formatting.
-* crimsdings - General debugging and error resolution.
-* Vladimir Berezhnoy - Feature to copy track name from DTS.
-* Ricardo Capurro - Bug reporting on uncommon uses.
-* Tom Flanagan - Idea for downmixing support.
-* lgringo - Suggestion to copy audio track delay.
-* Huss - Suggestion of ability to set niceness.
-* Florian Beverborg - Suggestion of `--new` argument to leave original untouched.
-* Daniele Nicolucci - `df` portability fixes.
-* Florian Coulmier - Bug reports and patches.
-* NameLessJedi - Header compression disabling suggestion.
-* d4nyl0 - Transition to ffmpeg
-* n-i-x - Progress display on file copy
-
-And to everyone who submitted bug reports through email and on networkedmediatank.com!
-
-
 License
 =======
 
-    Copyright 2011 Jake Wharton
+    Copyright 2018 Trevin Chow
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
