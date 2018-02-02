@@ -155,6 +155,17 @@ checkdep() {
 	fi
 }
 
+# Usage: checkdocker dockername
+checkdocker() {
+	containerId=$( sudo docker images -q "$1" )
+	if [[ -n "$containerId" ]]; then
+		return 1
+	else
+		error $"MKVToolNix container \"$1\" is not present.  Please make sure you have this dependency installed."
+		exit 1
+	fi
+}
+
 # Usage: cleanup file
 cleanup() {
 	if [ -f "$1" ]; then
@@ -355,10 +366,7 @@ if [ $EXECUTE = 1 ]; then
 	fi
 
 	# Check dependencies
-	# TREVIN: Replace these 3 checks with making sure MKVToolNix docker is running
-	#checkdep mkvmerge
-	#checkdep mkvextract
-	#checkdep mkvinfo
+	checkdocker jlesage/mkvtoolnix
 	checkdep ffmpeg
 	checkdep rsync
 	checkdep perl
