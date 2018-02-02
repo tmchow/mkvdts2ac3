@@ -310,16 +310,9 @@ while [ -z "$MKVFILE" ]; do
 			exit 1
 		;;
 		* )
-			MKVFILE=$1
+			#Always use full file path so it works with docker approach with mkvtoolnix
+			MKVFILE=`readlink -f $1`
 			shift
-
-                        # Ensure file is passed in with absolute path, otherwise won't work with docker container approach
-                       	MKVFILE_FULLPATH=`readlink -f $MKVFILE`
-                       	if [ $MKVFILE != $MKVFILE_FULLPATH ]; then
-                               	error $"You must pass in full absolute path to file."
-                               	exit 1
-                       	fi
-
 
 			# Ensure there are no arguments after the filename
 			if [ $# -ne 0 ]; then
