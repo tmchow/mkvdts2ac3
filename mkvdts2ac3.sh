@@ -23,7 +23,7 @@
 
 
 # Display version header
-echo "mkvdts2ac3-1.0 - by Trevin Chow"
+echo "mkvdts2ac3-1.0"
 
 # Debugging flags
 # DO NOT EDIT THESE! USE --debug OR --test ARGUMENT INSTEAD.
