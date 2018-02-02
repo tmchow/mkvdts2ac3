@@ -39,6 +39,7 @@ MD5=0
 INITIAL=0
 NEW=0
 COMP="none"
+UNRAID=1
 WD="/mnt/user/movies-processing" # Working Directory (Use the -w/--wd argument to change)
 
 # These are so you can make quick changes to the cmdline args without having to search and replace the entire script
@@ -705,6 +706,11 @@ else
 			if [ $OLDFILEMD5 -ne $NEWFILEMD5 ]; then
 				error $"'$NEWFILE' and '$MKVFILE' files do not match. You might want to investigate!"
 			fi
+		fi
+		# Set permissions suitable for unraid
+		if [ $UNRAID = 1 ]; then
+			chown nobody:users "$MKVFILE"
+			chmod 666 "$MKVFILE"
 		fi
 	fi
 	# Remove new file in $WD
